@@ -54,4 +54,7 @@ Gunicorn is a Python WSGI HTTP Server for UNIX.
    ```
 
 ## Testing
-TODO
+You can run tests with:
+```bash
+python tests.py
+```
