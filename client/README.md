@@ -7,7 +7,7 @@ Python 3.4+ should be already installed on your system, along with `pip`.
 
 **Note:** If you'd like to install into a virtual environment, activate the environment before proceeding.
 
-Install dependencies of the service with `pip`:
+Install dependencies of the client with `pip`:
 ```bash
 pip install -r requirements.txt
 ```
