@@ -18,61 +18,67 @@ cmd_group.add_argument('-d', '--delete', metavar='name', help="Delete an item.")
 cmd_group.add_argument('-l', '--list', action='store_true', help="List all items.")
 parser.add_argument('-t', '--timeout', default=5, help="Timeout in seconds.")
 
-def print_error(response):
-    print("Something went wrong: {reason} ({code})".format(
-          reason=response.reason, code=response.status_code))
-    sys.exit(1)
+def get_error(response):
+    return (
+        "Ooops! Something went wrong: {reason} ({code})".format(
+            reason=response.reason,
+            code=response.status_code
+        ),
+        response.status_code
+    )
     
 def create_item(service_url, timeout, name, description):
     resp = requests.post(service_url, timeout=timeout,
                          json={'name': name, 'description': description})
     if resp.status_code == 200:
-        print("Item created successfully.")
+        return "Item created successfully.", 0
     elif resp.status_code == 409:
-        print("An item with this name already exists.")
+        return "An item with this name already exists.", 1
     else:
-        print_error(resp)
+        return get_error(resp)
 
 def query_item(service_url, timeout, name):
     resp = requests.get(service_url, timeout=timeout, json={'name': name})
     if resp.status_code == 200:
-        print("Description: {description}".format(**resp.json()))
+        return "Description: {description}".format(**resp.json()), 0
     elif resp.status_code == 404:
-        print("Item not found.")
+        return "Item not found.", 1
     else:
-        print_error(resp)
+        return get_error(resp)
 
 def update_item(service_url, timeout, name, description):
     resp = requests.put(service_url, timeout=timeout,
                         json={'name': name, 'description': description})
     if resp.status_code == 200:
-        print("Item updated successfully.")
+        return "Item updated successfully.", 0
     elif resp.status_code == 404:
-        print("Item not found.")
+        return "Item not found.", 1
     else:
-        print_error(resp)
+        return get_error(resp)
 
 def delete_item(service_url, timeout, name):
     resp = requests.delete(service_url, timeout=timeout, json={'name': name})
     if resp.status_code == 200:
-        print("Item deleted successfully.")
+        return "Item deleted successfully.", 0
     elif resp.status_code == 204:
-        print("Item not found.")
+        return "Item not found.", 1
     else:
-        print_error(resp)
+        return get_error(resp)
 
 def list_items(service_url, timeout):
     resp = requests.get(service_url, timeout=timeout)
     if resp.status_code == 200:
         items = resp.json()['items']
         if items:
-            print("Items:")
-            for item in items:
-                print("- {name}".format(**item))
+            return (
+                "Items:\n" + "\n".join("- {name}".format(**item)
+                                       for item in items),
+                0
+            )
         else:
-            print("No items to show.")
+            return "No items to show.", 0
     else:
-        print_error(resp)
+        return get_error(resp)
 
 if __name__ == '__main__':
     cmd_args = parser.parse_args()
@@ -81,15 +87,17 @@ if __name__ == '__main__':
     timeout = cmd_args.timeout
 
     if cmd_args.create:
-        create_item(service_url, timeout, *cmd_args.create)
+        msg, code = create_item(service_url, timeout, *cmd_args.create)
     elif cmd_args.query:
-        query_item(service_url, timeout, cmd_args.query)
+        msg, code = query_item(service_url, timeout, cmd_args.query)
     elif cmd_args.update:
-        update_item(service_url, timeout, *cmd_args.update)
+        msg, code = update_item(service_url, timeout, *cmd_args.update)
     elif cmd_args.delete:
-        delete_item(service_url, timeout, cmd_args.delete)
+        msg, code = delete_item(service_url, timeout, cmd_args.delete)
     elif cmd_args.list:
-        list_items(service_url, timeout)
+        msg, code = list_items(service_url, timeout)
     else:
-        parser.print_help()
+        msg, code = parser.format_help(), -1
 
+    print(msg)
+    sys.exit(code)
