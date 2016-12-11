@@ -45,10 +45,12 @@ export URL_PATH=/items  # customize this!
 Gunicorn is a Python WSGI HTTP Server for UNIX.
 
 1. Install Gunicorn
+   
    ```bash
    pip install gunicorn
    ```
 2. Run Gunicorn
+   
    ```bash
    gunicorn -w 4 -b localhost:11111 wsgi:application
    ```
