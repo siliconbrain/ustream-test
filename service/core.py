@@ -16,7 +16,7 @@ class RedisWrapper:
 
     def get_all(self):
         keys = self.rdb.keys()
-        values = self.rdb.mget(keys)
+        values = self.rdb.mget(keys) if keys else []
         items = zip(keys, values)
         return [(decode(k), decode(v)) for k, v in items if v is not None]
 

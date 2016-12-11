@@ -35,7 +35,7 @@ For more options, see `python main.py --help`.
 
 
 ### Using WSGI
-In your WSGI configuration you should reference `application` inside `wsgi.py`.
+In your WSGI configuration you should reference `application` inside the `wsgi` module.
 Also, the URL path has to be set via the environment variable `URL_PATH`:
 ```bash
 export URL_PATH=/items  # customize this!

@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
 import requests
-import sys
 
-parser = ArgumentParser(description="Command line client for The Items Service.")
+parser = ArgumentParser(
+    description="Command line client for The Items Service."
+)
 
-parser.add_argument('url', help="The URL the service is available at. "
+parser.add_argument('url', help="URL the service is available at. "
                                 "E.g.: http://127.0.0.1:8000/items")
 cmd_group = parser.add_mutually_exclusive_group(required=True)
-cmd_group.add_argument('-c', '--create', nargs=2, metavar=('name', 'description'),
+cmd_group.add_argument('-c', '--create', nargs=2,
+                       metavar=('name', 'description'),
                        help="Create a new item.")
 cmd_group.add_argument('-q', '--query', metavar='name',
                        help="Query the description of an item.")
-cmd_group.add_argument('-u', '--update', nargs=2, metavar=('name', 'description'),
+cmd_group.add_argument('-u', '--update', nargs=2,
+                       metavar=('name', 'description'),
                        help="Update an item's description.")
-cmd_group.add_argument('-d', '--delete', metavar='name', help="Delete an item.")
-cmd_group.add_argument('-l', '--list', action='store_true', help="List all items.")
-parser.add_argument('-t', '--timeout', default=5, help="Timeout in seconds.")
+cmd_group.add_argument('-d', '--delete', metavar='name',
+                       help="Delete an item.")
+cmd_group.add_argument('-l', '--list', action='store_true',
+                       help="List all items.")
+parser.add_argument('-t', '--timeout', default=5, help="Timeout in seconds. "
+                                                       "Default is 5.")
+
 
 def get_error(response):
     return (
@@ -26,7 +33,8 @@ def get_error(response):
         ),
         response.status_code
     )
-    
+
+
 def create_item(service_url, timeout, name, description):
     resp = requests.post(service_url, timeout=timeout,
                          json={'name': name, 'description': description})
@@ -37,6 +45,7 @@ def create_item(service_url, timeout, name, description):
     else:
         return get_error(resp)
 
+
 def query_item(service_url, timeout, name):
     resp = requests.get(service_url, timeout=timeout, json={'name': name})
     if resp.status_code == 200:
@@ -45,6 +54,7 @@ def query_item(service_url, timeout, name):
         return "Item not found.", 1
     else:
         return get_error(resp)
+
 
 def update_item(service_url, timeout, name, description):
     resp = requests.put(service_url, timeout=timeout,
@@ -56,6 +66,7 @@ def update_item(service_url, timeout, name, description):
     else:
         return get_error(resp)
 
+
 def delete_item(service_url, timeout, name):
     resp = requests.delete(service_url, timeout=timeout, json={'name': name})
     if resp.status_code == 200:
@@ -64,6 +75,7 @@ def delete_item(service_url, timeout, name):
         return "Item not found.", 1
     else:
         return get_error(resp)
+
 
 def list_items(service_url, timeout):
     resp = requests.get(service_url, timeout=timeout)
@@ -79,6 +91,7 @@ def list_items(service_url, timeout):
             return "No items to show.", 0
     else:
         return get_error(resp)
+
 
 if __name__ == '__main__':
     cmd_args = parser.parse_args()
@@ -100,4 +113,5 @@ if __name__ == '__main__':
         msg, code = parser.format_help(), -1
 
     print(msg)
+    import sys
     sys.exit(code)
